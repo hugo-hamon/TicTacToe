@@ -89,6 +89,15 @@ class TicTacToe:
     def is_over(self) -> bool:
         """Check if the game is over."""
         return self.get_winner() is not None or self.is_full()
+    
+    def get_value(self, player: Player) -> float:
+        """Return the value of the game for the given player."""
+        winner = self.get_winner()
+        if winner is None:
+            return 0
+        if winner == player:
+            return 1
+        return -1
 
     # Commands
     def play(self, row: int, column: int) -> None:
