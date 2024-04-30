@@ -1,8 +1,7 @@
 from __future__ import annotations
-from TicTacToeRL.project.src.game.tictactoe import TicTacToe, Player, get_opponent
+from ..game.tictactoe import TicTacToe, Player, get_opponent
 from typing import Optional
 from enum import Enum
-import math
 
 
 class Algorithm(Enum):
