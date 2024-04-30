@@ -1,5 +1,5 @@
 from __future__ import annotations
-from TicTacToeRL.project.src.game.tictactoe import TicTacToe
+from ..game.tictactoe import TicTacToe
 from typing import Optional
 import numpy as np
 import random

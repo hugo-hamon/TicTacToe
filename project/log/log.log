@@ -1,2 +1,4 @@
-29-Apr-24 16:42:21 - __main__ - INFO - Starting run.py
-29-Apr-24 16:42:21 - __main__ - INFO - Using config file config/default.toml
+30-Apr-24 16:59:17 - __main__ - INFO - Starting run.py
+30-Apr-24 16:59:17 - __main__ - INFO - Using config file config/default.toml
+30-Apr-24 16:59:17 - src.app - INFO - Player 1 is using human and Player 2 is using human
+30-Apr-24 16:59:17 - src.app - INFO - Running the game with shell graphics
