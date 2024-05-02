@@ -27,12 +27,9 @@ class Game:
         # row, column, diagonal, anti-diagonal
         self.open_lines = {
             Player.PLAYER1: np.zeros((4, self.row_number, self.column_number)),
-            Player.PLAYER2: np.zeros((4, self.row_number, self.column_number))
+            Player.PLAYER2: np.zeros((4, self.row_number, self.column_number)),
         }
-        self.open_lines_count = {
-            Player.PLAYER1: 0,
-            Player.PLAYER2: 0
-        }
+        self.open_lines_count = {Player.PLAYER1: 0, Player.PLAYER2: 0}
 
         self.move_history = []
 
@@ -61,7 +58,7 @@ class Game:
     def get_move_history(self) -> list[tuple[int, int]]:
         """Return the move history."""
         return self.move_history
-    
+
     def get_number_of_open_lines(self, player: Player) -> int:
         """Return the number of open lines for the given player."""
         return self.open_lines_count[player]
@@ -92,9 +89,15 @@ class Game:
             start_column = max(0, column - self.to_align + 1 + i)
             end_row = min(self.row_number, row + 1 + i)
             end_column = min(self.column_number, column + 1 + i)
-            if end_row - start_row != self.to_align or end_column - start_column != self.to_align:
+            if (
+                end_row - start_row != self.to_align
+                or end_column - start_column != self.to_align
+            ):
                 continue
-            if np.all(np.diag(self.board[start_row:end_row, start_column:end_column]) == player.value):
+            if np.all(
+                np.diag(self.board[start_row:end_row, start_column:end_column])
+                == player.value
+            ):
                 return True
 
         # list all the anti-diagonals that could be affected by the move
@@ -103,9 +106,17 @@ class Game:
             start_column = max(0, column - self.to_align + 1 + i)
             end_row = min(self.row_number, row + self.to_align - i)
             end_column = min(self.column_number, column + i + 1)
-            if end_row - start_row != self.to_align or end_column - start_column != self.to_align:
+            if (
+                end_row - start_row != self.to_align
+                or end_column - start_column != self.to_align
+            ):
                 continue
-            if np.all(np.diag(np.fliplr(self.board[start_row:end_row, start_column:end_column])) == player.value):
+            if np.all(
+                np.diag(
+                    np.fliplr(self.board[start_row:end_row, start_column:end_column])
+                )
+                == player.value
+            ):
                 return True
 
         return False
@@ -156,6 +167,25 @@ class Game:
             return
         self.play(*move)
 
+    def undo(self) -> None:
+        """Undo the last move."""
+        if not self.move_history or self.is_over():
+            return
+        row, column = self.move_history.pop()
+        self.board[row, column] = 0
+        self.current_player = Player.PLAYER1
+
+        # Reset the open lines
+        self.open_lines_count = {Player.PLAYER1: 0, Player.PLAYER2: 0}
+        self.open_lines = {
+            Player.PLAYER1: np.zeros((4, self.row_number, self.column_number)),
+            Player.PLAYER2: np.zeros((4, self.row_number, self.column_number)),
+        }
+        self.init_open_lines()
+        for move in self.move_history:
+            self.update_open_lines(move[0], move[1], self.get_opponent(self.current_player))
+            self.switch_player()
+
     def init_open_lines(self) -> None:
         """
         Initialize the open lines for each player."""
@@ -204,6 +234,18 @@ class Game:
         """Switch the current player."""
         self.current_player = self.get_opponent(self.current_player)
 
+    def reset(self) -> None:
+        """Reset the game."""
+        self.board = np.zeros((self.row_number, self.column_number))
+        self.current_player = Player.PLAYER1
+        self.winner = None
+        self.move_history = []
+        self.open_lines = {
+            Player.PLAYER1: np.zeros((4, self.row_number, self.column_number)),
+            Player.PLAYER2: np.zeros((4, self.row_number, self.column_number)),
+        }
+        self.open_lines_count = {Player.PLAYER1: 0, Player.PLAYER2: 0}
+
     def copy(self) -> Game:
         """Return a copy of the current game."""
         game = Game(self.config, self.player_controllers)
@@ -213,11 +255,11 @@ class Game:
         game.move_history = self.move_history.copy()
         game.open_lines = {
             Player.PLAYER1: self.open_lines[Player.PLAYER1].copy(),
-            Player.PLAYER2: self.open_lines[Player.PLAYER2].copy()
+            Player.PLAYER2: self.open_lines[Player.PLAYER2].copy(),
         }
         game.open_lines_count = {
             Player.PLAYER1: self.open_lines_count[Player.PLAYER1],
-            Player.PLAYER2: self.open_lines_count[Player.PLAYER2]
+            Player.PLAYER2: self.open_lines_count[Player.PLAYER2],
         }
 
         return game
@@ -259,3 +301,52 @@ class Game:
                 if cell_value > 0:
                     self.open_lines[player][3, i, j] = 0
                     self.open_lines_count[player] -= 1
+
+    def get_value_and_terminated(self) -> tuple[int, bool]:
+        """Return the value of the game and whether it is terminated after playing the given action."""
+        is_over = self.is_over()
+        if is_over:
+            winner = self.get_winner()
+            if winner is None:
+                return 0, True
+            return 1, True
+        return 0, False
+    
+    def get_one_hot_valid_moves(self) -> np.ndarray:
+        """Return the one-hot encoding of the valid moves."""
+        return (self.board.reshape(-1) == 0).astype(np.uint8)
+    
+    def get_encoded_state(self) -> np.ndarray:
+        """Return the encoded state of the game."""
+        encoded_state = np.stack(
+            (self.board == 0, self.board == 1, self.board == 2)
+        ).astype(np.float32)
+        
+        return encoded_state
+    
+    def change_perspective(self, player: int) -> Game:
+        """Change the perspective of the game."""
+        if player == 1:
+            return self
+        new_board = np.zeros((self.row_number, self.column_number))
+        new_board[self.board == 1] = 2
+        new_board[self.board == 2] = 1
+
+        new_open_lines = {
+            Player.PLAYER1: self.open_lines[Player.PLAYER2].copy(),
+            Player.PLAYER2: self.open_lines[Player.PLAYER1].copy(),
+        }
+        new_open_lines_count = {
+            Player.PLAYER1: self.open_lines_count[Player.PLAYER2],
+            Player.PLAYER2: self.open_lines_count[Player.PLAYER1],
+        }
+
+        new_game = Game(self.config, self.player_controllers)
+        new_game.board = new_board
+        new_game.current_player = self.get_opponent(self.current_player)
+        new_game.winner = self.get_opponent(self.winner) if self.winner is not None else None
+        new_game.move_history = self.move_history.copy()
+        new_game.open_lines = new_open_lines
+        new_game.open_lines_count = new_open_lines_count
+
+        return new_game

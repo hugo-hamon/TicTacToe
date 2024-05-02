@@ -1,7 +1,9 @@
 from .utils.manager_func import match_manager, get_user_move
 from .graphics.shell.shell_graphics import ShellGraphics
 from .manager.user_manager import UserManager
+from .trainer.alpha_zero import AlphaZero
 from .manager.manager import Manager
+from .trainer.model import ResNet
 from .config import load_config
 from .game.game import Player
 from typing import Optional
@@ -25,6 +27,10 @@ class App:
 
     def run(self) -> None:
         """Run tic-tac-toe game based on the configuration."""
+
+        if self.config.alpha_zero.training_enabled:
+            self.train()
+
         self.player1 = match_manager(
             self.config,
             self.config.user.player1_algorithm,
@@ -63,6 +69,13 @@ class App:
                     cmdline_args=["--start-fullscreen"],
                     shutdown_delay=5
                 )
+
+    # AlphaZero functions
+    def train(self) -> None:
+        """Train the model."""
+        model = ResNet(self.config, 3, 4, 64)
+        model = AlphaZero(self.config, model)
+        model.learn()
 
     # Shell functions
     def run_with_shell_graphics(self, graphics: ShellGraphics) -> None:
@@ -169,3 +182,18 @@ class App:
         """Check if the game is over."""
         if self.game:
             return self.game.is_over()
+        
+    def eel_reset_game(self) -> None:
+        """Reset the game."""
+        if self.game:
+            self.game.reset()
+            self.game.init_open_lines()
+            self.logger.info("Game reset")
+
+    def eel_undo(self) -> None:
+        """Go to the last human move."""
+        if self.game:
+            self.game.undo()
+            is_current_player_human = self.eel_is_current_player_human()
+            if not is_current_player_human:
+                self.game.undo()

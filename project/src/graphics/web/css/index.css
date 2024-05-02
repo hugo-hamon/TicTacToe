@@ -1,11 +1,51 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;900&display=swap');
 
-:root {
+:root{
+    --background-color: white;
+    --x-color-primary: #D45757;
+    --x-color-shadow: #D4575740;
+    --o-color-primary: #373434;
+    --o-color-shadow: #37343420;
+}
+
+[color-scheme="default-dark"] {
+    --background-color: #262D3C;
+    --x-color-primary: #D45757;
+    --x-color-shadow: #D4575740;
+    --o-color-primary: white;
+    --o-color-shadow: #FFFFFF10;
+}
+
+[color-scheme="mono-light"] {
+    --background-color: white;
+    --x-color-primary: black;
+    --x-color-shadow: #00000020;
+    --o-color-primary: black;
+    --o-color-shadow: #00000020;
+}
+
+[color-scheme="mono-dark"] {
+    --background-color: black;
+    --x-color-primary: white;
+    --x-color-shadow: #FFFFFF30;
+    --o-color-primary: white;
+    --o-color-shadow: #FFFFFF30;
+}
+
+[color-scheme="solarized-light"] {
     --background-color: #FDF6E3;
     --x-color-primary: #CB4B16;
     --x-color-shadow: #CB4B1635;
     --o-color-primary: #586E75;
     --o-color-shadow: #586E7540;
+}
+
+[color-scheme="solarized-dark"] {
+    --background-color: #073642;
+    --x-color-primary: #CB4B16;
+    --x-color-shadow: #CB4B1640;
+    --o-color-primary: #eee8d5;
+    --o-color-shadow: #eee8d520;
 }
 
 html,
@@ -122,5 +162,58 @@ select:not(.cell):active {
     transition: color 1s ease;
 }
 
-#main-container h1.x {color: var(--x-color-primary)}
-#main-container h1.o {color: var(--o-color-primary)}
+#main-container h1.x {
+    color: var(--x-color-primary)
+}
+
+#main-container h1.o {
+    color: var(--o-color-primary)
+}
+
+
+#menu {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+#menu button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background: var(--background-color);
+    color: var(--o-color-primary);
+    font-size: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 0 10px 0 var(--o-color-shadow);
+    width: 100%;
+}
+
+#themes-container {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 10px;
+    margin-left: 10px;
+}
+
+.theme-button {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    margin: 5px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.2)
+}
