@@ -18,9 +18,15 @@ class MinimaxManager(Manager):
 
     def get_move(self, game: Game) -> Optional[tuple[int, int]]:
         """Return the best move using the minimax algorithm"""
-        _, best_move = self.minimax(game, self.depth, True, game.get_current_player())
+        score, best_move = self.minimax(
+            game, self.depth, True, game.get_current_player()
+        )
+        if score == -game.row_number * game.column_number:
+            # If the score is the worst possible, return a move with minimax depth == 1
+            _, best_move = self.minimax(
+                game, 1, True, game.get_current_player()
+            )
         return best_move
-    
 
     def minimax(self, game: Game, depth: int, maximizing: bool, player: Player) -> tuple[float, Optional[tuple[int, int]]]:
         """Return the best move and its score."""
@@ -34,7 +40,8 @@ class MinimaxManager(Manager):
             for move in game.get_possible_moves():
                 game_copy = game.copy()
                 game_copy.play(move[0], move[1])
-                move_value, _ = self.minimax(game_copy, depth - 1, False, player)
+                move_value, _ = self.minimax(
+                    game_copy, depth - 1, False, player)
                 if move_value > value:
                     value = move_value
                     best_move = move
@@ -43,7 +50,8 @@ class MinimaxManager(Manager):
             for move in game.get_possible_moves():
                 game_copy = game.copy()
                 game_copy.play(move[0], move[1])
-                move_value, _ = self.minimax(game_copy, depth - 1, True, player)
+                move_value, _ = self.minimax(
+                    game_copy, depth - 1, True, player)
                 if move_value < value:
                     value = move_value
                     best_move = move
@@ -58,7 +66,9 @@ class MinimaxManager(Manager):
         else:
             winner = game.get_winner()
         if winner is None:
-            return game.line_open(player) - game.line_open(game.get_opponent(player))
+            return game.get_number_of_open_lines(player) - game.get_number_of_open_lines(
+                game.get_opponent(player)
+            )
         elif winner == player:
             return game.row_number * game.column_number
         return -game.row_number * game.column_number

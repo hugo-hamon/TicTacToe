@@ -8,6 +8,8 @@ from typing import Optional
 from .game.game import Game
 import logging
 import time
+import eel
+import os
 
 
 class App:
@@ -26,7 +28,7 @@ class App:
         self.player1 = match_manager(
             self.config,
             self.config.user.player1_algorithm,
-            self.config.user.player2_depth,
+            self.config.user.player1_depth,
         )
 
         self.player2 = match_manager(
@@ -46,14 +48,27 @@ class App:
                 Player.PLAYER2.name: self.player2.get_move,
             },
         )
+        self.game.init_open_lines()
 
         if self.config.graphics.graphics_enabled:
             if self.config.graphics.shell_graphics:
                 graphics = ShellGraphics(self.config)
                 self.run_with_shell_graphics(graphics)
+            else:
+                eel.init("src/graphics/web")
+                self.expose_functions()
+                eel.start(
+                    "index.html",
+                    mode="firefox",
+                    cmdline_args=["--start-fullscreen"],
+                    shutdown_delay=5
+                )
 
+    # Shell functions
     def run_with_shell_graphics(self, graphics: ShellGraphics) -> None:
         """Run the game with shell graphics."""
+        if not self.game:
+            raise ValueError("Game not initialized")
         self.logger.info("Running the game with shell graphics")
         graphics.draw(self.game)
         last_state = self.game.get_board().copy()
@@ -75,9 +90,82 @@ class App:
 
     def check_for_human_input(self, player: Player) -> None:
         """Check for human input."""
+        if not self.game:
+            raise ValueError("Game not initialized")
         if player == Player.PLAYER1 and isinstance(self.player1, UserManager):
             move = get_user_move(self.game)
             self.player1.set_move(move)
         elif player == Player.PLAYER2 and isinstance(self.player2, UserManager):
             move = get_user_move(self.game)
             self.player2.set_move(move)
+
+    # eel functions
+    def expose_functions(self) -> None:
+        """Expose functions to JavaScript"""
+        functions = self.__dir__()
+        for function in functions:
+            if function.startswith("eel_"):
+                eel.expose(getattr(self, function))
+
+    def eel_stop(self) -> None:
+        """Stop the program."""
+        self.logger.info("Stopping the program")
+        os._exit(0)
+
+    def eel_get_grid_size(self) -> tuple[int, int]:
+        """Get the grid size."""
+        return self.config.game.row_number, self.config.game.column_number
+
+    def eel_get_board(self) -> Optional[list[list[str]]]:
+        """Get the board."""
+        if self.game:
+            return self.game.get_board().tolist()
+        
+    def eel_get_current_player(self) -> Optional[int]:
+        """Get the current player."""
+        if self.game:
+            return self.game.get_current_player().value
+
+    def eel_make_move(self, row: int, column: int) -> int:
+        """Make a move."""
+        return_code = -1
+        if self.game:
+            if not self.game.is_valid_move(row, column):
+                return return_code
+
+            current_player = self.game.get_current_player()
+            if isinstance(self.player1, UserManager) and current_player == Player.PLAYER1:
+                self.player1.set_move((row, column))
+                return_code = 0
+            elif isinstance(self.player2, UserManager) and current_player == Player.PLAYER2:
+                self.player2.set_move((row, column))
+                return_code = 0
+
+        return return_code
+    
+    def eel_get_winner(self) -> Optional[int]:
+        """Get the winner."""
+        if self.game:
+            winner = self.game.get_winner()
+            if winner:
+                return winner.value
+            
+    def eel_update_game(self) -> None:
+        """Update the game."""
+        if self.game:
+            self.game.update()
+
+    def eel_is_current_player_human(self) -> bool:
+        """Check if the current player is human."""
+        if self.game:
+            current_player = self.game.get_current_player()
+            if current_player == Player.PLAYER1 and isinstance(self.player1, UserManager):
+                return True
+            elif current_player == Player.PLAYER2 and isinstance(self.player2, UserManager):
+                return True
+        return False
+    
+    def eel_is_game_over(self) -> Optional[bool]:
+        """Check if the game is over."""
+        if self.game:
+            return self.game.is_over()
