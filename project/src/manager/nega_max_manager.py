@@ -18,7 +18,7 @@ class NegaMaxManager(Manager):
 
     def get_move(self, game: Game) -> Optional[tuple[int, int]]:
         """Return the best move using the negamax algorithm"""
-        _, best_move = self.negamax(
+        score, best_move = self.negamax(
             game,
             self.depth,
             float("-inf"),
@@ -26,6 +26,16 @@ class NegaMaxManager(Manager):
             1,
             game.get_current_player(),
         )
+        if score == -game.row_number * game.column_number:
+            # If the score is the worst possible, return a move with negamax depth == 1
+            _, best_move = self.negamax(
+                game,
+                1,
+                float("-inf"),
+                float("inf"),
+                1,
+                game.get_current_player(),
+            )
         return best_move
 
     def negamax(
@@ -68,7 +78,9 @@ class NegaMaxManager(Manager):
         else:
             winner = game.get_winner()
         if winner is None:
-            return game.line_open(player) - game.line_open(game.get_opponent(player))
+            return game.get_number_of_open_lines(player) - game.get_number_of_open_lines(
+                game.get_opponent(player)
+            )
         elif winner == player:
             return game.row_number * game.column_number
         return -game.row_number * game.column_number
