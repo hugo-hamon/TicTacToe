@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;900&display=swap');
+
+:root {
+    --background-color: #FDF6E3;
+    --x-color-primary: #CB4B16;
+    --x-color-shadow: #CB4B1635;
+    --o-color-primary: #586E75;
+    --o-color-shadow: #586E7540;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    color: var(--o-color-primary);
+    background-color: var(--background-color);
+}
+
+@media screen and (max-width: 600px),
+screen and (max-height: 800px) {
+
+    html,
+    body {
+        zoom: 0.9;
+    }
+}
+
+#main-container {
+    padding: 40px 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#grid {
+    display: grid;
+    grid-template-columns: 100px 100px 100px;
+    grid-template-rows: 100px 100px 100px;
+}
+
+.cell,
+.cell::after {
+    background: transparent;
+    /* transition: border-width 0.15s linear; */
+    transition: background 0.3s ease, border-radius 0.4s ease, border 0.3s ease, transform 0.2s ease, width 0.2s ease, height 0.2s ease, margin 0.2s ease;
+    padding: 0;
+}
+
+.cell::after {
+    content: "";
+    position: absolute;
+    transform: translateX(-50%) translateY(-50%);
+    opacity: 0.3;
+    box-sizing: border-box;
+}
+
+.cell.square,
+.cell.square::after {
+    margin: 15px;
+    width: 70px;
+    height: 70px;
+    border: 2px solid var(--x-color-primary);
+    border-radius: 15px;
+}
+
+.cell.circle,
+.cell.circle::after {
+    margin: 12.5px;
+    width: 75px;
+    height: 75px;
+    border: 2px solid var(--o-color-primary);
+    border-radius: 50%;
+}
+
+.cell:hover,
+.cell:hover::after {
+    border-width: 5px;
+}
+
+.cell:active,
+.cell:active::after {
+    border-width: 8px;
+}
+
+button,
+select {
+    transition: transform 0.2s linear;
+}
+
+button:not(.cell):hover,
+select:hover {
+    transform: scale(1.1);
+}
+
+button:not(.cell):active,
+select:not(.cell):active {
+    transform: scale(0.9);
+}
+
+.cell.square.filled,
+.cell.square.filled::after {
+    border: 35px solid var(--x-color-primary);
+    background: var(--x-color-primary);
+}
+
+.cell.circle.filled,
+.cell.circle.filled::after {
+    border: 18px solid var(--o-color-primary);
+}
+
+
+#main-container h1 {
+    padding-bottom: 40px;
+    font-size: 45px;
+    font-weight: 900;
+    white-space: nowrap;
+    margin: 0;
+    transition: color 1s ease;
+}
+
+#main-container h1.x {color: var(--x-color-primary)}
+#main-container h1.o {color: var(--o-color-primary)}

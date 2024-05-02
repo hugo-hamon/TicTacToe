@@ -22,6 +22,17 @@ class Game:
 
         self.board = np.zeros((self.row_number, self.column_number))
         self.current_player = Player.PLAYER1
+        self.winner = None
+
+        # row, column, diagonal, anti-diagonal
+        self.open_lines = {
+            Player.PLAYER1: np.zeros((4, self.row_number, self.column_number)),
+            Player.PLAYER2: np.zeros((4, self.row_number, self.column_number))
+        }
+        self.open_lines_count = {
+            Player.PLAYER1: 0,
+            Player.PLAYER2: 0
+        }
 
         self.move_history = []
 
@@ -36,10 +47,7 @@ class Game:
 
     def get_winner(self) -> Optional[Player]:
         """Return the winner if there is one, else return None."""
-        for player in Player:
-            if self.check_winner(player):
-                return player
-        return None
+        return self.winner
 
     def get_possible_moves(self) -> list[tuple[int, int]]:
         """Return the possible moves."""
@@ -54,7 +62,11 @@ class Game:
         """Return the move history."""
         return self.move_history
     
-    def better_check_winner(self, row: int, column: int, player: Player) -> bool:
+    def get_number_of_open_lines(self, player: Player) -> int:
+        """Return the number of open lines for the given player."""
+        return self.open_lines_count[player]
+
+    def check_winner(self, row: int, column: int, player: Player) -> bool:
         """Check if the given player has won the game in O(n)."""
         # list all the rows that could be affected by the move
         for i in range(self.to_align):
@@ -64,7 +76,7 @@ class Game:
                 continue
             if np.all(self.board[row, start:end] == player.value):
                 return True
-            
+
         # list all the columns that could be affected by the move
         for i in range(self.to_align):
             start = max(0, row - self.to_align + 1 + i)
@@ -73,7 +85,7 @@ class Game:
                 continue
             if np.all(self.board[start:end, column] == player.value):
                 return True
-            
+
         # list all the diagonals that could be affected by the move
         for i in range(self.to_align):
             start_row = max(0, row - self.to_align + 1 + i)
@@ -87,52 +99,14 @@ class Game:
 
         # list all the anti-diagonals that could be affected by the move
         for i in range(self.to_align):
-            start_row = max(0, row + self.to_align - 1 - i)
+            start_row = max(0, row - i)
             start_column = max(0, column - self.to_align + 1 + i)
-            end_row = min(self.row_number, row - i)
-            end_column = min(self.column_number, column + 1 + i)
-            print(start_row, end_row, start_column, end_column)
+            end_row = min(self.row_number, row + self.to_align - i)
+            end_column = min(self.column_number, column + i + 1)
             if end_row - start_row != self.to_align or end_column - start_column != self.to_align:
                 continue
-            print(self.board[start_row:end_row, start_column:end_column])
-            print(np.diag(np.fliplr(self.board[start_row:end_row, start_column:end_column])))
             if np.all(np.diag(np.fliplr(self.board[start_row:end_row, start_column:end_column])) == player.value):
                 return True
-            
-        return False
-
-
-    def check_winner(self, player: Player) -> bool:
-        """Check if the given player has won the game."""
-        # Check rows
-        for i in range(self.row_number):
-            for j in range(self.column_number - self.to_align + 1):
-                if np.all(self.board[i, j : j + self.to_align] == player.value):
-                    return True
-
-        # Check columns
-        for i in range(self.row_number - self.to_align + 1):
-            for j in range(self.column_number):
-                if np.all(self.board[i : i + self.to_align, j] == player.value):
-                    return True
-
-        # Check diagonals
-        for i in range(self.row_number - self.to_align + 1):
-            for j in range(self.column_number - self.to_align + 1):
-                if np.all(
-                    np.diag(self.board[i : i + self.to_align, j : j + self.to_align])
-                    == player.value
-                ):
-                    return True
-                if np.all(
-                    np.diag(
-                        np.fliplr(
-                            self.board[i : i + self.to_align, j : j + self.to_align]
-                        )
-                    )
-                    == player.value
-                ):
-                    return True
 
         return False
 
@@ -167,8 +141,10 @@ class Game:
             raise ValueError("Invalid move")
 
         self.board[row, column] = self.current_player.value
-        self.better_check_winner(row, column, self.current_player)
+        if self.check_winner(row, column, self.current_player):
+            self.winner = self.current_player
         self.switch_player()
+        self.update_open_lines(row, column, self.current_player)
         self.move_history.append((row, column))
 
     def update(self) -> None:
@@ -179,6 +155,41 @@ class Game:
         if move is None:
             return
         self.play(*move)
+
+    def init_open_lines(self) -> None:
+        """
+        Initialize the open lines for each player."""
+        # Rows initialization
+        for row in range(self.row_number):
+            for col in range(self.column_number - self.to_align + 1):
+                self.open_lines[Player.PLAYER1][0, row, col] = 1
+                self.open_lines[Player.PLAYER2][0, row, col] = 1
+                self.open_lines_count[Player.PLAYER1] += 1
+                self.open_lines_count[Player.PLAYER2] += 1
+
+        # Columns initialization
+        for col in range(self.column_number):
+            for row in range(self.row_number - self.to_align + 1):
+                self.open_lines[Player.PLAYER1][1, row, col] = 1
+                self.open_lines[Player.PLAYER2][1, row, col] = 1
+                self.open_lines_count[Player.PLAYER1] += 1
+                self.open_lines_count[Player.PLAYER2] += 1
+
+        # Diagonals initialization
+        for row in range(self.row_number - self.to_align + 1):
+            for col in range(self.column_number - self.to_align + 1):
+                self.open_lines[Player.PLAYER1][2, row, col] = 1
+                self.open_lines[Player.PLAYER2][2, row, col] = 1
+                self.open_lines_count[Player.PLAYER1] += 1
+                self.open_lines_count[Player.PLAYER2] += 1
+
+        # Anti-diagonals initialization
+        for row in range(self.row_number - 1, self.to_align - 2, -1):
+            for col in range(self.column_number - self.to_align + 1):
+                self.open_lines[Player.PLAYER1][3, row, col] = 1
+                self.open_lines[Player.PLAYER2][3, row, col] = 1
+                self.open_lines_count[Player.PLAYER1] += 1
+                self.open_lines_count[Player.PLAYER2] += 1
 
     # Utils
     def get_opponent(self, player: Player) -> Player:
@@ -198,42 +209,53 @@ class Game:
         game = Game(self.config, self.player_controllers)
         game.board = self.board.copy()
         game.current_player = self.current_player
+        game.winner = self.winner
         game.move_history = self.move_history.copy()
+        game.open_lines = {
+            Player.PLAYER1: self.open_lines[Player.PLAYER1].copy(),
+            Player.PLAYER2: self.open_lines[Player.PLAYER2].copy()
+        }
+        game.open_lines_count = {
+            Player.PLAYER1: self.open_lines_count[Player.PLAYER1],
+            Player.PLAYER2: self.open_lines_count[Player.PLAYER2]
+        }
+
         return game
 
-    def line_open(self, player: Player) -> int:
-        """Return the number of open lines for the given player."""
-        count = 0
-        opponent_value = self.get_opponent(player).value
-        for i in range(self.row_number):
-            for j in range(self.column_number - self.to_align + 1):
-                if np.any(self.board[i, j : j + self.to_align] == opponent_value):
-                    continue
-                count += 1
+    def update_open_lines(self, row: int, column: int, player: Player) -> None:
+        """Update the open lines after a move for the given player."""
+        # Rows update
+        for i in range(max(0, column - self.to_align + 1), column + 1):
+            cell_value = self.open_lines[player][0, row, i]
+            if cell_value > 0:
+                self.open_lines[player][0, row, i] = 0
+                self.open_lines_count[player] -= 1
 
-        for i in range(self.row_number - self.to_align + 1):
-            for j in range(self.column_number):
-                if np.any(self.board[i : i + self.to_align, j] == opponent_value):
-                    continue
-                count += 1
+        # Columns update
+        for i in range(max(0, row - self.to_align + 1), row + 1):
+            cell_value = self.open_lines[player][1, i, column]
+            if cell_value > 0:
+                self.open_lines[player][1, i, column] = 0
+                self.open_lines_count[player] -= 1
 
-        for i in range(self.row_number - self.to_align + 1):
-            for j in range(self.column_number - self.to_align + 1):
-                if np.any(
-                    np.diag(self.board[i : i + self.to_align, j : j + self.to_align])
-                    == opponent_value
-                ):
+        # Diagonals update
+        for i in range(max(0, row - self.to_align + 1), row + 1):
+            for j in range(max(0, column - self.to_align + 1), column + 1):
+                if row - i != column - j:
                     continue
-                count += 1
-                if np.any(
-                    np.diag(
-                        np.fliplr(
-                            self.board[i : i + self.to_align, j : j + self.to_align]
-                        )
-                    )
-                    == opponent_value
-                ):
-                    continue
-                count += 1
 
-        return count
+                cell_value = self.open_lines[player][2, i, j]
+                if cell_value > 0:
+                    self.open_lines[player][2, i, j] = 0
+                    self.open_lines_count[player] -= 1
+
+        # Anti-diagonals update
+        for i in range(min(self.row_number - 1, row + self.to_align - 1), row - 1, -1):
+            for j in range(max(0, column - self.to_align + 1), column + 1):
+                if row - i != j - column:
+                    continue
+
+                cell_value = self.open_lines[player][3, i, j]
+                if cell_value > 0:
+                    self.open_lines[player][3, i, j] = 0
+                    self.open_lines_count[player] -= 1

@@ -18,7 +18,7 @@ class AlphaBetaManager(Manager):
 
     def get_move(self, game: Game) -> Optional[tuple[int, int]]:
         """Return the best move using the alpha beta algorithm"""
-        _, best_move = self.alphabeta(
+        score, best_move = self.alphabeta(
             game,
             self.depth,
             float("-inf"),
@@ -26,6 +26,16 @@ class AlphaBetaManager(Manager):
             True,
             game.get_current_player(),
         )
+        if score == -game.row_number * game.column_number:
+            # If the score is the worst possible, return a move with alphabeta depth == 1
+            _, best_move = self.alphabeta(
+                game,
+                1,
+                float("-inf"),
+                float("inf"),
+                True,
+                game.get_current_player(),
+            )
         return best_move
 
     def alphabeta(
@@ -71,7 +81,7 @@ class AlphaBetaManager(Manager):
                 beta = min(beta, value)
                 if value <= alpha:
                     break
-
+        
         return value, best_move
 
     def get_score(self, game: Game, player: Player) -> float:
@@ -82,8 +92,9 @@ class AlphaBetaManager(Manager):
         else:
             winner = game.get_winner()
         if winner is None:
-            return game.line_open(player) - game.line_open(game.get_opponent(player))
+            return game.get_number_of_open_lines(player) - game.get_number_of_open_lines(
+                game.get_opponent(player)
+            )
         elif winner == player:
             return game.row_number * game.column_number
         return -game.row_number * game.column_number
-

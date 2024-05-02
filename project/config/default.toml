@@ -1,23 +1,24 @@
 [user]
-player1_algorithm = "human"
+player1_algorithm = "alpha_beta"
 player2_algorithm = "human"
-player1_depth = 4
-player2_depth = 4
+player1_depth = 3
+player2_depth = 3
 
 [graphics]
 graphics_enabled = true
-shell_graphics = true
+shell_graphics = false
 player1_symbol = "X"
 player2_symbol = "O"
 
 [game]
-row_number = 10
-column_number = 10
-to_align = 4
+row_number = 3
+column_number = 3
+to_align = 3
 
 [mcts]
-exploration_constant = 2.0
-simulations_per_iteration = 100
+exploration_constant = 1.41
+stable_iterations = -1 # -1 for no limit
+simulations_per_iteration = 10000
 
 [model]
 training_enabled = false

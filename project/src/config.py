@@ -29,6 +29,7 @@ class GameConfig:
 @dataclass
 class MCTSConfig:
     exploration_constant: float
+    stable_iterations: int
     simulations_per_iteration: int
 
 
