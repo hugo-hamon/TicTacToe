@@ -11,6 +11,19 @@
 </head>
 
 <body>
+    <div id="themes-container">
+        <button class="theme-button" onclick="document.documentElement.setAttribute('color-scheme','default-light')" style="background-color: #D45757"></button>
+        <button class="theme-button" onclick="document.documentElement.setAttribute('color-scheme','default-dark')" style="background-color: #262D3C"></button>
+        <button class="theme-button" onclick="document.documentElement.setAttribute('color-scheme','mono-light')" style="background-color: white"></button>
+        <button class="theme-button" onclick="document.documentElement.setAttribute('color-scheme','mono-dark')" style="background-color: black"></button>
+        <button class="theme-button" onclick="document.documentElement.setAttribute('color-scheme','solarized-light')" style="background-color: #FDF6E3"></button>
+        <button class="theme-button" onclick="document.documentElement.setAttribute('color-scheme','solarized-dark')" style="background-color: #073642"></button>
+    </div>
+    <div id="menu">
+        <button id="reset" onclick="reset()">Reset</button>
+        <button id="undo" onclick="undo()">Undo</button>
+        <button id="quit" onclick="quit()">Quit</button>
+    </div>
     <div id="main-container">
         <h1 id="player" class="x">X's turn</h1>
         <div id="grid">

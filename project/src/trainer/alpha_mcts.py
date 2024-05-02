@@ -1,7 +1,8 @@
 from __future__ import annotations
+from ..game.game import Game
+from ..config import Config
 from typing import Optional
-from .config import Config
-from .game import Game
+import torch.nn as nn
 import numpy as np
 import torch
 import math
@@ -10,17 +11,10 @@ import math
 class Node:
 
     def __init__(
-        self,
-        game: Game,
-        config: Config,
-        state: np.ndarray,
-        parent=None,
-        action_taken=None,
-        prior=0,
+        self, config: Config, game: Game, parent=None, action_taken=None, prior=0
     ) -> None:
-        self.game = game
         self.config = config
-        self.state = state
+        self.game = game
         self.parent = parent
         self.action_taken = action_taken
         self.prior = prior
@@ -48,6 +42,7 @@ class Node:
         return best_child
 
     def get_ucb(self, child: Node) -> float:
+        """Return the UCB score of the child."""
         q_value = (
             0
             if child.visit_count == 0
@@ -60,40 +55,36 @@ class Node:
             * child.prior
         )
 
-    def expand(self, policy: np.ndarray) -> Optional[Node]:
+    def expand(self, policy: np.ndarray) -> None:
         """Expand the node by creating all possible children."""
-        child = None
         for action, prob in enumerate(policy):
+            row = action // self.config.game.column_number
+            column = action % self.config.game.column_number
             if prob > 0:
-                child_state = self.state.copy()
-                child_state = self.game.get_next_state(child_state, action, 1)
-                child_state = self.game.change_perspective(child_state, -1)
+                game_copy = self.game.copy()
+                game_copy.play(row, column)
 
-                child = Node(self.game, self.config, child_state, self, action, prob)
+                child = Node(self.config, game_copy, self, action, prob)
                 self.children.append(child)
 
-        return child
-
     def backpropagate(self, value: float) -> None:
-        """Update the node's value and visit count."""
+        """Backpropagate the value to the root node."""
         self.value_sum += value
         self.visit_count += 1
 
-        value = self.game.get_opponent_value(value)
         if self.parent is not None:
-            self.parent.backpropagate(value)
+            self.parent.backpropagate(-value)
 
 
 class MCTS:
 
-    def __init__(self, game: Game, config: Config, model: ResNet) -> None:
-        self.game = game
+    def __init__(self, config: Config, model: nn.Module) -> None:
         self.config = config
         self.model = model
 
     @torch.no_grad()
-    def search(self, state: np.ndarray) -> np.ndarray:
-        root = Node(self.game, self.config, state)
+    def search(self, game: Game) -> np.ndarray:
+        root = Node(self.config, game)
 
         for _ in range(self.config.mcts.simulations_per_iteration):
             node = root
@@ -103,13 +94,16 @@ class MCTS:
                 if node is None:
                     raise Exception("Node is None")
 
-            value, is_terminal = self.game.get_value_and_terminated(node.state, node.action_taken)
-            value = self.game.get_opponent_value(value)
+            value, is_terminal = node.game.get_value_and_terminated()
+            value = -value
 
             if not is_terminal:
-                policy, value = self.model(self.game.get_encoded_state(node.state))
-                policy = policy.squeeze(0).squeeze(0).squeeze(0).cpu().numpy()
-                valid_moves = self.game.get_valid_moves(node.state)
+                # policy, value = self.model(node.game.get_encoded_state())
+                policy, value = self.model(
+                    torch.tensor(node.game.get_encoded_state()).unsqueeze(0)
+                )
+                policy = torch.softmax(policy, dim=1).squeeze(0).cpu().numpy()
+                valid_moves = node.game.get_one_hot_valid_moves()
                 policy *= valid_moves
                 policy /= np.sum(policy)
 
@@ -119,7 +113,7 @@ class MCTS:
 
             node.backpropagate(value)
 
-        action_probs = np.zeros(self.game.action_size)
+        action_probs = np.zeros(self.config.game.row_number * self.config.game.column_number)
         for child in root.children:
             action_probs[child.action_taken] = child.visit_count
         action_probs /= np.sum(action_probs)

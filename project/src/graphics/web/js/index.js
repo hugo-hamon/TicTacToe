@@ -90,6 +90,7 @@ async function update_game() {
         if (winner == null) {
             document.getElementById("player").innerHTML = "It's a draw!";
             document.getElementById("player").className = "x";
+            setTimeout(update_game, 1000);
             return;
         }
         else if (winner == 1) {
@@ -100,6 +101,7 @@ async function update_game() {
         }
         document.getElementById("player").innerHTML = winner + " wins!";
         document.getElementById("player").className = winner.toLowerCase();
+        setTimeout(update_game, 1000);
         return;
     }
     let current_player = await eel.eel_is_current_player_human()();
@@ -107,7 +109,6 @@ async function update_game() {
         await eel.eel_update_game();
     }
     await update_grid();
-    console.log("Updated game");
     // Recursive call
     setTimeout(update_game, 10);
 }
@@ -127,3 +128,24 @@ window.addEventListener("beforeunload", function () {
 
 
 main();
+
+// Functions for the buttons
+async function reset() {
+    eel.eel_reset_game();
+    update_grid();
+}
+
+async function undo() {
+    let is_human = await eel.eel_is_current_player_human()();
+    if (is_human == false) {
+        return;
+    }
+    eel.eel_undo();
+    update_grid();
+}
+
+
+function quit() {
+    eel.eel_stop();
+    window.close();
+}

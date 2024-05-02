@@ -34,10 +34,11 @@ class MCTSConfig:
 
 
 @dataclass
-class ModelConfig:
+class AlphaZeroConfig:
     training_enabled: bool
     training_iterations: int
     self_play_iterations: int
+    learning_rate: float
     epochs: int
     batch_size: int
     temperature: float
@@ -49,7 +50,7 @@ class Config:
     graphics: GraphicsConfig
     game: GameConfig
     mcts: MCTSConfig
-    model: ModelConfig
+    alpha_zero: AlphaZeroConfig
 
 
 def load_config(config_path: str) -> Config:

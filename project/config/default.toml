@@ -1,7 +1,7 @@
 [user]
 player1_algorithm = "alpha_beta"
 player2_algorithm = "human"
-player1_depth = 3
+player1_depth = 5
 player2_depth = 3
 
 [graphics]
@@ -11,19 +11,20 @@ player1_symbol = "X"
 player2_symbol = "O"
 
 [game]
-row_number = 3
-column_number = 3
-to_align = 3
+row_number = 6
+column_number = 6
+to_align = 4
 
 [mcts]
 exploration_constant = 1.41
 stable_iterations = -1 # -1 for no limit
-simulations_per_iteration = 10000
+simulations_per_iteration = 500
 
-[model]
+[alpha_zero]
 training_enabled = false
-training_iterations = 20
+training_iterations = 10
 self_play_iterations = 100
+learning_rate = 0.001
 epochs = 4
 batch_size = 64
 temperature = 1
