@@ -38,6 +38,7 @@ class AlphaZeroConfig:
     training_enabled: bool
     training_iterations: int
     self_play_iterations: int
+    using_ray: bool
     learning_rate: float
     epochs: int
     batch_size: int

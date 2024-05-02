@@ -11,6 +11,7 @@ from .game.game import Game
 import logging
 import time
 import eel
+import ray
 import os
 
 
@@ -73,9 +74,16 @@ class App:
     # AlphaZero functions
     def train(self) -> None:
         """Train the model."""
+        if self.config.alpha_zero.using_ray:
+            ray.init(num_cpus=10)
+
         model = ResNet(self.config, 3, 4, 64)
         model = AlphaZero(self.config, model)
         model.learn()
+
+        if self.config.alpha_zero.using_ray:
+            ray.shutdown()
+        self.logger.info("Training completed")
 
     # Shell functions
     def run_with_shell_graphics(self, graphics: ShellGraphics) -> None:
@@ -133,7 +141,7 @@ class App:
         """Get the board."""
         if self.game:
             return self.game.get_board().tolist()
-        
+
     def eel_get_current_player(self) -> Optional[int]:
         """Get the current player."""
         if self.game:
@@ -155,14 +163,14 @@ class App:
                 return_code = 0
 
         return return_code
-    
+
     def eel_get_winner(self) -> Optional[int]:
         """Get the winner."""
         if self.game:
             winner = self.game.get_winner()
             if winner:
                 return winner.value
-            
+
     def eel_update_game(self) -> None:
         """Update the game."""
         if self.game:
@@ -177,12 +185,12 @@ class App:
             elif current_player == Player.PLAYER2 and isinstance(self.player2, UserManager):
                 return True
         return False
-    
+
     def eel_is_game_over(self) -> Optional[bool]:
         """Check if the game is over."""
         if self.game:
             return self.game.is_over()
-        
+
     def eel_reset_game(self) -> None:
         """Reset the game."""
         if self.game:
