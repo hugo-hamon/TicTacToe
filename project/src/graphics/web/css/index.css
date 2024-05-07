@@ -217,3 +217,26 @@ select:not(.cell):active {
     padding: 0;
     border: 1px solid rgba(0, 0, 0, 0.2)
 }
+
+#credits {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    font-size: 0.8em;
+    color: var(--o-color-primary);
+    height: fit-content;
+    margin: 5px;
+}
+
+#credits p {
+    margin: 0;
+}
+
+#credits a {
+    color: var(--x-color-primary);
+    text-decoration: none;
+}
+
+#credits a:hover {
+    text-decoration: underline;
+}

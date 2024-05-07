@@ -1,8 +1,8 @@
 [user]
-player1_algorithm = "human"
+player1_algorithm = "minimax"
 player2_algorithm = "human"
-player1_depth = 0
-player2_depth = 0
+player1_depth = 3
+player2_depth = 3
 
 [graphics]
 graphics_enabled = true
