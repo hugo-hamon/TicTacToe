@@ -1,7 +1,7 @@
-02-May-24 21:11:23 - __main__ - INFO - Starting run.py
-02-May-24 21:11:23 - __main__ - INFO - Using config file config/default.toml
-02-May-24 21:27:07 - src.trainer.alpha_zero - INFO - Self-play iterations took 939.81s
-02-May-24 21:41:06 - src.trainer.alpha_zero - INFO - Self-play iterations took 833.58s
-02-May-24 21:54:15 - src.trainer.alpha_zero - INFO - Self-play iterations took 784.20s
-02-May-24 22:06:07 - src.trainer.alpha_zero - INFO - Self-play iterations took 707.66s
-02-May-24 22:17:04 - src.trainer.alpha_zero - INFO - Self-play iterations took 651.51s
+07-May-24 15:57:09 - __main__ - INFO - Starting run.py
+07-May-24 15:57:09 - __main__ - INFO - Using config file config/default.toml
+07-May-24 15:57:09 - src.app - INFO - Player 1 is using human and Player 2 is using human
+07-May-24 15:57:09 - geventwebsocket.handler - INFO - 127.0.0.1 - - [2024-05-07 15:57:09] "GET /index.html HTTP/1.1" 200 2119 0.001376
+07-May-24 15:57:09 - geventwebsocket.handler - INFO - 127.0.0.1 - - [2024-05-07 15:57:09] "GET /eel.js HTTP/1.1" 200 6217 0.000617
+07-May-24 15:57:09 - geventwebsocket.handler - INFO - 127.0.0.1 - - [2024-05-07 15:57:09] "GET /css/index.css HTTP/1.1" 200 4866 0.000834
+07-May-24 15:57:09 - geventwebsocket.handler - INFO - 127.0.0.1 - - [2024-05-07 15:57:09] "GET /js/index.js HTTP/1.1" 200 4848 0.000738

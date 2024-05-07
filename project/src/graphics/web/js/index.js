@@ -52,6 +52,7 @@ async function update_grid() {
     // 0: empty, 1: X, 2: O
     let board = await eel.eel_get_board()();
     let player = await eel.eel_get_current_player()();
+    let is_human = await eel.eel_is_current_player_human()();
     let rows = board.length;
     let columns = board[0].length;
 
@@ -74,11 +75,21 @@ async function update_grid() {
     
     if (player == 2) {
         document.getElementById("player").className = "o";
-        document.getElementById("player").innerHTML = "O's turn";
+        if (is_human) {
+            document.getElementById("player").innerHTML = "O's turn";
+        } else {
+            document.getElementById("player").innerHTML = "AI is thinking...";
+            document.getElementById("player").className = "o thinking";
+        }
     }
     else {
         document.getElementById("player").className = "x";
-        document.getElementById("player").innerHTML = "X's turn";
+        if (is_human) {
+            document.getElementById("player").innerHTML = "X's turn";
+        } else {
+            document.getElementById("player").innerHTML = "AI is thinking...";
+            document.getElementById("player").className = "x thinking";
+        }
     }
 }
 
@@ -104,6 +115,7 @@ async function update_game() {
         setTimeout(update_game, 1000);
         return;
     }
+    await update_grid();
     let current_player = await eel.eel_is_current_player_human()();
     if (current_player == false) {
         await eel.eel_update_game();
@@ -122,9 +134,9 @@ async function main() {
 
 
 // Exit the python process when the browser window is closed
-window.addEventListener("beforeunload", function () {
-    eel.eel_stop();
-});
+// window.addEventListener("beforeunload", function () {
+//     eel.eel_stop();
+// });
 
 
 main();

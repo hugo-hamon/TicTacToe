@@ -1,8 +1,8 @@
 [user]
-player1_algorithm = "human"
+player1_algorithm = "alpha_zero"
 player2_algorithm = "human"
-player1_depth = 0
-player2_depth = 0
+player1_depth = 4
+player2_depth = 5
 
 [graphics]
 graphics_enabled = true
@@ -11,9 +11,9 @@ player1_symbol = "X"
 player2_symbol = "O"
 
 [game]
-row_number = 3
-column_number = 3
-to_align = 3
+row_number = 5
+column_number = 5
+to_align = 4
 
 [mcts]
 exploration_constant = 1.41
@@ -21,7 +21,7 @@ stable_iterations = -1 # -1 for no limit
 simulations_per_iteration = 2000
 
 [alpha_zero]
-training_enabled = false
+training_enabled = true
 training_iterations = 40
 using_ray = true
 self_play_iterations = 200
