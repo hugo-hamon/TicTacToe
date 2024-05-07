@@ -20,13 +20,13 @@ The project includes the following elements:
 ## Game Previews
 
 ### 5x5 Game
-<img src="md-images/game_example_1.png" alt="5x5 Game" width="960" height="540">
+<img src="md-images/game_example_1.png" alt="5x5 Game" width="640" height="360">
 
 ### 3x3 Game
-<img src="md-images/game_example_3.png" alt="3x3 Game" width="960" height="540">
+<img src="md-images/game_example_3.png" alt="3x3 Game" width="640" height="360">
 
 ### Game Against AlphaZero
-<img src="md-images/game_example_2.png" alt="AlphaZero AI" width="960" height="540">
+<img src="md-images/game_example_2.png" alt="AlphaZero AI" width="640" height="360">
 
 
 ## Installation
